@@ -36,3 +36,6 @@ vignettes/*.pdf
 # Auxiliary package files
 /tmp/
 
+# Other temp files
+*.html
+*.xlsx
