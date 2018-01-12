@@ -12,25 +12,26 @@ Fill in at the end of your data analysis before you knit the file - include info
 
 ## Load libraries, data, and define standards
 load necessary R libraries and data, define accepted standard values for correcting standards
+
+To install the newest version of the **isoprocessCUBES** package, run the following in the console: 
+ - install.packages("devtools")
+ - devtools::install_github("KopfLab/isoprocessCUBES")
+
 ```{r load-stuff}
 library(tidyverse)
 library(stringr)
 library(openxlsx)
 library(plotly)
+library(isoprocessCUBES)
 ```
+
+Document knitted with isoprocessCUBES version `r packageVersion("isoprocessCUBES")`.
 
 load data
 ```{r load-data}
-base.directory<-"~/Google Drive/Delta methods"  #change this file path if you move the clump.functions.R file
-               #alternative for PC users: "C:\\Users\\V\\Google Drive\\Delta methods"
-
-#stopifnot(file.exists(folder)) #presents an error if the folder containing the custom funcitons file isn't there or the path is wrong
-
-source(file.path(base.directory, "custom.functions.R"))
-
 session<-"XXXXXX"   #update this to name your own session
 
-raw.data<-read.csv("XXXX.csv")   #enter the name of your data input file here; should be saved as a .csv file
+raw.data<-read.csv("Gasbench_data_template.csv")   #enter the name of your data input file here; should be saved as a .csv file
 raw.data<-subset(raw.data, Peak.Nr>5 )
 ```
 
@@ -915,7 +916,7 @@ O.disc.all <-
            size = 4, hjust=0, vjust=0, colour="blue") +
   labs(x = col_for_disc)
 
-O.disc.all
+#O.disc.all
 ```
 
 ```{r add_disc_to_stds.mean.table.O}
@@ -932,12 +933,6 @@ O.stds.table$discO.sd <- c(sd(discO.corr$d18O.disc), discO.mon.sd, sd(discO.dis$
 
 save data to spreadsheet
 ```{r save.data}
-add_ws_with_data <- function(wb, sheet, data) {
-  addWorksheet(wb, sheet)
-  writeData(wb, sheet=sheet, data)
-  return(wb)
-}
-
 wb <- createWorkbook("data") 
 wb <- add_ws_with_data(wb, "offsetC", offsetC)
 wb <- add_ws_with_data(wb, "driftC", driftC)
