@@ -39,3 +39,5 @@ vignettes/*.pdf
 # Other temp files
 *.html
 *.xlsx
+*.png
+*.pdf
