@@ -1,13 +1,14 @@
-# Multiple plot function
-#
-# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
-# - cols:   Number of columns in layout
-# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
-#
-# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
-# then plot 1 will go in the upper left, 2 will go in the upper right, and
-# 3 will go all the way across the bottom.
-#
+#' Multiple plot function
+#'
+#' ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+#' - cols:   Number of columns in layout
+#' - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+#'
+#' If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+#' then plot 1 will go in the upper left, 2 will go in the upper right, and
+#' 3 will go all the way across the bottom.
+#'
+#' @export
 multiplot <- function(..., plotlist=NULL, file=NULL, cols=1, layout=NULL, width=8.5, height=11) {
   require(grid)
 
@@ -50,6 +51,9 @@ multiplot <- function(..., plotlist=NULL, file=NULL, cols=1, layout=NULL, width=
 # calculate means of subsets of a dataframe #
 #############################################
 
+#' Calculate means
+#'
+#' @export
 calc_means <- function(df, x_col) {
   df$x <- df[[x_col]]
   df %>%
@@ -124,30 +128,39 @@ york.conf.pred.interval<-function(reg.df, all.df, mass, slope, intercept, conf.l
 ## calculate temps and se from D47 values
 ######################
 
-# Original Ghosh calibration, using CIT reference frame values
+#' Original Ghosh calibration, using CIT reference frame values
+#' @export
 convert_CIT.D47_to_CIT.Ghosh.temp <- function(D47) {
   round((59200/(D47+0.02))^0.5-273.15, 1)
 }
 
-# Ghosh calibration in ARF ref frame, using ARF D47 values
+#' Ghosh calibration in ARF ref frame, using ARF D47 values
+#' @export
 convert_ARF.D47_to_ARF.Ghosh.temp <- function(D47) {
   round((63600/(D47+0.0047))^0.5-273.15, 1)
 }
 
-# Dennis Calibration in ARF ref frame, using ARF D47 values
+#' Dennis Calibration in ARF ref frame, using ARF D47 values
+#' @export
 convert_ARF.D47_to_ARF.Dennis.temp <- function(D47) {
   round((36200/(D47-0.292))^0.5-273.15, 1)
 }
 
+#' Calc D47 temp se
+#' @export
 calc_D47.Temp_se <- function(Temp, D47, D47se) {
   round(sqrt(abs((((Temp + 273.15)^6)/4)*(6.35164845416249E-13 + 2 * D47 * - 1.03937857088367E-12 +
                                                           ((D47)^2) * 1.7284993474114E-12 + 0.0000169461014527562^2 * D47se^2))), 1)
 }
 
+#' Calc d18
+#' @export
 calc_d18Ow <- function(d18Om, Temp) {
   round((((1.03091 * d18Om + 30.91) + 1000)/(exp((((18.03 * 10^3)/(Temp + 273.15)) - 32.42) / 10^3))) - 1000, 1)
 }
 
+#' Calc d18O
+#' @export
 calc_d18Owse <- function (d18Om, d18Omse, Temp, Tempse) {
   round(sqrt((((18.03 * ((1.03091 * d18Om + 30.91) + 1000) * exp(0.03242)) / (exp(18.03 / (Temp + 273.15)) * (Temp + 273.15)^2) * Tempse)^2) + ((exp(0.03242) / exp(18.03/(Temp + 273.15)) * d18Omse)^2)), 1)
 }
@@ -156,8 +169,10 @@ calc_d18Owse <- function (d18Om, d18Omse, Temp, Tempse) {
 ## York Regression in general form ##
 #####################################
 
-#script for generating a york regression of a dataset with errors in both x and y
-
+#' York reg general form
+#'
+#' script for generating a york regression of a dataset with errors in both x and y
+#' @export
 york.regression<-function(X,x.err,Y,y.err,error.corr)  #for clumps, X is d47, Y is D47, and the term "error.corr" is for how correlated the y.err are with the x.err - for my purposes, I usually use a value of 0
 {  					#opens the function, everything with one "<"in here is internal, two "<" means I can call the value by naming it
   weightsX<-1/(x.err^2)	#set up to input error rather than variance; could use either stdev or sterr in this depending on how your statistics are being used
@@ -204,44 +219,54 @@ york.regression<-function(X,x.err,Y,y.err,error.corr)  #for clumps, X is d47, Y 
  # use with the geom_text(x=, y= label=lm_eqn(...))     #
  ########################################################
 
-  #for just a basic linear regression
-  lm_eqn = function(x,y){
-    m = lm(y ~ x)
-    eq <- substitute(italic(y) == b %.% italic(x) + a * "," ~ italic(r)^2 == r2,
-                     list(a = format(coef(m)[1], digits = 2),
-                          b = format(coef(m)[2], digits = 2),
-                          r2 = format(summary(m)$r.squared, digits = 2)))
-    as.character(as.expression(eq))
+#' lm poly eq on plot
+#' for just a second-order polynomial
+#' @export
+lm_poly2eqn = function(x,y){
+  m = lm(y ~ poly(x,2, raw=TRUE)) #need raw=TRUE to get same coefficients as excel and same fit done by GGPLOT2
+  eq <- substitute(italic(y) == c %.% italic(x)^2 + b %.% italic(x) + a * "," ~ italic(r)^2 == r2,
+                   list(a = format(coef(m)[1], digits = 2),
+                        b = format(coef(m)[2], digits = 2),
+                        c = format(coef(m)[3], digits = 2),
+                        r2 = format(summary(m)$r.squared, digits = 2)))
+  as.character(as.expression(eq))
+}
+
+# lm eqn. on plots
+# for just a basic linear regression
+# @export
+# lm_eqn = function(x,y){
+#   m = lm(y ~ x)
+#   eq <- substitute(italic(y) == b %.% italic(x) + a * "," ~ italic(r)^2 == r2,
+#                    list(a = format(coef(m)[1], digits = 2),
+#                         b = format(coef(m)[2], digits = 2),
+#                         r2 = format(summary(m)$r.squared, digits = 2)))
+#   as.character(as.expression(eq))
+# }
+
+#' lm eqn. on plots
+#' form that deals with negatives better, normal linear regression
+#' for just a basic linear regression
+#' @export
+lm_eqn = function(x,y) {
+  m = lm(y ~ x)
+  l <- list(a = format(abs(coef(m)[1]), digits = 2),
+            b = format(coef(m)[2], digits = 2),
+            r2 = format(summary(m)$r.squared, digits = 2));
+
+  if (coef(m)[1] >= 0)  {
+    eq <- substitute(italic(y) == b %.% italic(x) + a *","~~italic(r)^2~"="~r2,l)
+  } else {
+    eq <- substitute(italic(y) == b %.% italic(x) - a *","~~italic(r)^2~"="~r2,l)
   }
 
-  #for just a second-order polynomial
-  lm_poly2eqn = function(x,y){
-    m = lm(y ~ poly(x,2, raw=TRUE)) #need raw=TRUE to get same coefficients as excel and same fit done by GGPLOT2
-    eq <- substitute(italic(y) == c %.% italic(x)^2 + b %.% italic(x) + a * "," ~ italic(r)^2 == r2,
-                     list(a = format(coef(m)[1], digits = 2),
-                          b = format(coef(m)[2], digits = 2),
-                          c = format(coef(m)[3], digits = 2),
-                          r2 = format(summary(m)$r.squared, digits = 2)))
-    as.character(as.expression(eq))
-  }
+  as.character(as.expression(eq));
+}
 
- #form that deals with negatives better, normal linear regression
-  lm_eqn = function(x,y) {
-    m = lm(y ~ x)
-    l <- list(a = format(abs(coef(m)[1]), digits = 2),
-              b = format(coef(m)[2], digits = 2),
-              r2 = format(summary(m)$r.squared, digits = 2));
-
-    if (coef(m)[1] >= 0)  {
-      eq <- substitute(italic(y) == b %.% italic(x) + a *","~~italic(r)^2~"="~r2,l)
-    } else {
-      eq <- substitute(italic(y) == b %.% italic(x) - a *","~~italic(r)^2~"="~r2,l)
-    }
-
-    as.character(as.expression(eq));
-  }
-
-#form that does this for york regression results
+#' plot eqns
+#'
+#' form that does this for york regression results
+#' @export
 york_eqn = function(slope, intercept){
 
   l<-list(m=round(slope, 4),
@@ -257,32 +282,35 @@ york_eqn = function(slope, intercept){
 }
 
 
-  ###########################
-  #function for ascribing a color from the wheel
-  gg_color_hue <- function(n) {
-    hues = seq(15, 375, length=n+1)
-    hcl(h=hues, l=65, c=100)[1:n]
-  }
+###########################
+#' function for ascribing a color from the wheel
+#' @export
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length=n+1)
+  hcl(h=hues, l=65, c=100)[1:n]
+}
 
 
   ######################
   ## coding examples: expressions
   #how to code strings of text, useful for using "parse" eg in geom_text
-  ggplot(data.frame(x=1:3, y=1:3), aes(x,y)) + geom_point() + labs(x=expression(Delta^2 + a == x^2 + 5 ~ "hello" ~ sqrt(x) ~ "" ~ Delta), y=expression(Delta[47]^"wurst" ~ "C"))
+  #ggplot(data.frame(x=1:3, y=1:3), aes(x,y)) + geom_point() + labs(x=expression(Delta^2 + a == x^2 + 5 ~ "hello" ~ sqrt(x) ~ "" ~ Delta), y=expression(Delta[47]^"wurst" ~ "C"))
 
   ######################
   #math expressions that can be used in plots to create d18O min and fluid contours, if x is temp, and y is 18O
   #e.g. fluid contour is y=0.97006*(((z+1000)*exp((((18.03*10^3)/(x+273.15))-32.42)/10^3))-1000)-29.94 for a given z (d18O fluid)
   #e.g. 1.03091*(((z+1000)*1/(exp((((18.03*10^3)/(x+273.15))-32.42)/10^3)))-1000) + 30.91 for a given z (d18O rock)
 
-  contours<-function(x, k, fun) {
-    xN<-length(x)
-    kN<-length(k)
-    allX<-rep(x, times=kN)
-    allK<-rep(k, each=xN)
-    y<-do.call(fun, args=list(x=allX, k=allK))
-    data.frame(x=allX, y=y, k=allK)
-  }
+#' contours
+#' @export
+contours<-function(x, k, fun) {
+  xN<-length(x)
+  kN<-length(k)
+  allX<-rep(x, times=kN)
+  allK<-rep(k, each=xN)
+  y<-do.call(fun, args=list(x=allX, k=allK))
+  data.frame(x=allX, y=y, k=allK)
+}
 
 #example code for how to call the contour functions
 #  modelDF.fluid<-contours(
@@ -298,20 +326,35 @@ york_eqn = function(slope, intercept){
 #example code to plot the contours
 #ggplot(modelDF, aes(x, y, group=k, label=k)) + geom_line(colour="red") + geom_text(data=subset(modelDF, x==-5), aes(y=y+0.3), colour="red")
 
+# excel export ---------
+
+#' add worksheet with data
+#' @export
+add_ws_with_data <- function(wb, sheet, data) {
+  addWorksheet(wb, sheet)
+  writeData(wb, sheet=sheet, data)
+  return(wb)
+}
+
 ##########################################
 # code for color-blind friendly palettes
 #########################
-# The palette with grey:
-cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-# The palette with black:
-cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+.onLoad <- function(libname, pkgname) {
+  # make global variables for palettes
+  # The palette with grey:
+  cbPalette <<- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+  # The palette with black:
+  cbbPalette <<- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+}
+
 
 # To use for fills, add
-scale_fill_manual(values=cbPalette)
+#scale_fill_manual(values=cbPalette)
 
 # To use for line and point colors, add
-scale_colour_manual(values=cbPalette)
+#scale_colour_manual(values=cbPalette)
 
 
 
