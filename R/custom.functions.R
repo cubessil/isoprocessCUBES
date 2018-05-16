@@ -146,6 +146,13 @@ convert_ARF.D47_to_ARF.Dennis.temp <- function(D47) {
   round((36200/(D47-0.292))^0.5-273.15, 1)
 }
 
+#Bonifacie calibration in CDES ref frame, using CDES D47 values
+#' @export
+convert_ARF.D47_to_ARF.Bonifacie.temp <- function(D47) {
+  round(((0.0422*10^6)/(D47-0.1262))^0.5-273.15,1)
+}
+
+
 #' Calc D47 temp se
 #' @export
 calc_D47.Temp_se <- function(Temp, D47, D47se) {
