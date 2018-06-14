@@ -51,7 +51,7 @@ multiplot <- function(..., plotlist=NULL, file=NULL, cols=1, layout=NULL, width=
 # calculate means of subsets of a dataframe #
 #############################################
 
-#' Calculate means
+#' Calculate means using group_by type
 #'
 #' @export
 calc_means <- function(df, x_col) {
@@ -70,7 +70,28 @@ calc_means <- function(df, x_col) {
     filter(!is.na(yintercept))
 }
 
+#############################################
+# calculate means of subsets of a dataframe #
+#############################################
 
+#' Calculate means using groub_by(`Identifier 2`)
+#'
+#' @export
+calc_means_dxf <- function(df, x_col) {
+  df$x <- df[[x_col]]
+  df %>%
+    group_by(`Identifier 2`) %>%
+    summarise(
+      n = n(),
+      mean = mean(x),
+      `mean + sigma` = mean + sd(x),
+      `mean - sigma` = mean - sd(x),
+      `mean + 2 sigma` = mean + 2 * sd(x),
+      `mean - 2 sigma` = mean - 2 * sd(x)
+    ) %>%
+    gather(linetype, yintercept, -type, -n) %>%
+    filter(!is.na(yintercept))
+}
 #########################################
 # functions for clumped data processing #
 #########################################
