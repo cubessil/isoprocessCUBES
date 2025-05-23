@@ -187,6 +187,32 @@ calc_d18Owse <- function (d18Om, d18Omse, Temp, Tempse) {
   round(sqrt((((18.03 * ((1.03091 * d18Om + 30.91) + 1000) * exp(0.03242)) / (exp(18.03 / (Temp + 273.15)) * (Temp + 273.15)^2) * Tempse)^2) + ((exp(0.03242) / exp(18.03/(Temp + 273.15)) * d18Omse)^2)), 1)
 }
 
+calc_d18Ow_daeron <- function (d18Om, Temp) {
+  A = 17.57
+  B = 29.13
+  T_c = Temp + 273.15
+  d18O_vsmow = (1.03091 * d18Om + 30.91)
+  
+  numerator = d18O_vsmow + 1000
+  alpha  = exp((A * 1000 / T_c - B)/1000)
+  d18Ow = round(((numerator/alpha) - 1000),1)
+  
+  return (d18Ow)
+}
+
+
+calc_d18Owse_daeron <- function (d18Om, d18Omse, Temp, Tempse) {
+  A = 17.57
+  B = 29.13
+  T_c = Temp + 273.15
+  d18O_vsmow = (1.03091 * d18Om + 30.91)
+  
+  first_part = (((A *((d18O_vsmow) + 1000) * exp(B/1000)) / (exp(A /T_c) * T_c^2) * Tempse)^2)  
+  second_part = ((exp(B/1000) / exp(A/(T_c)) * d18Omse)^2)
+  d18Owse = round(sqrt(first_part +  second_part),1)
+  
+  return(d18Owse)
+}
 #####################################
 ## York Regression in general form ##
 #####################################
